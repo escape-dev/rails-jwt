@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::API
+  include ActionController::Helpers
+  rescue_from CanCan::AccessDenied, with: :access_denied_response 
   def encode_token(payload)
     JWT.encode(payload, 'secret')
   end  
@@ -29,4 +31,15 @@ class ApplicationController < ActionController::API
   def authorize
     render json: { message: 'You have to log in.' }, status: :unauthorized unless authorized_user
   end
+
+  private 
+
+  def access_denied_response
+    render json: { message: "Forbidden" }, status: :forbidden
+  end  
+
+  def current_user 
+    @current_user = @user if authorized_user 
+  end
+  helper_method :current_user
 end
